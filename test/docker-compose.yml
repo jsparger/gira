@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik.toml:/etc/traefik/traefik.toml
+      - ./cert.pem:/cert.pem
+      - ./key.pem:/key.pem
+  whoami:
+    container_name: whoami
+    image: emilevauge/whoami
+  proxy:
+    image: "node"
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./cors-anywhere-https:/home/node/app
+    expose:
+      - "443"
+    labels:
+    #   - traefik.frontend.entryPoints=https
+      - traefik.protocol=https
+      - "traefik.frontend.rule=PathPrefixStrip:/proxy/"
+    command: "npm start"
+  gira:
+    image: nginx
+    volumes:
+      - ../:/usr/share/nginx/html:ro
+    expose:
+      - "80"
+    # labels:
+    #   - traefik.protocol=http

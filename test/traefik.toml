@@ -1,0 +1,35 @@
+# print a lot of info from traefik
+logLevel = "INFO"
+
+# allow self signed certificate for backend
+# can open up possibility of man in the middle attack, but better than plaintext
+insecureSkipVerify = true
+
+# use https unless otherwise specified for specific backend
+defaultEntryPoints = ["https"]
+
+# Define https and https entrypoints
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    # [entryPoints.http.redirect]
+    # entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+  [entryPoints.https.tls]
+    # traefik will look for the cert and key at these locations (/)
+    [[entryPoints.https.tls.certificates]]
+      certFile = "cert.pem"
+      keyFile = "key.pem"
+
+# Enable web configuration backend
+[web]
+  # Web administration port
+  address = ":8080"
+
+
+# Enable Docker configuration backend
+# this will automatically expose containers on the same docker network as traefik
+[docker]
+  domain = "esss.lu.se"
+  watch = true
